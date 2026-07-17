@@ -1,0 +1,4 @@
+LIBRARY replace
+EXPORTS
+    decode_sequence
+    replace_in_files
