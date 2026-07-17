@@ -41,5 +41,33 @@ int main(int argc, char* argv[]) {
         decode_sequence(argv[4], replace, replace_len);
     }
 
+    FILE* f_in = fopen(argv[1], "rb");
+    if (!f_in) {
+        perror(argv[1]);
+        free(search); free(replace);
+        return 1;
+    }
+
+    FILE* f_out = fopen(argv[2], "wb");
+    if (!f_out) {
+        perror(argv[2]);
+        fclose(f_in); free(search); free(replace);
+        return 1;
+    }
+
+    int result = replace_in_files(f_in, f_out, search, search_len, replace, replace_len);
+
+    fclose(f_in);
+    fclose(f_out);
+    free(search);
+    free(replace);
+
+    if (result != 0) {
+        fprintf(stderr, "Error processing files.\n");
+        remove(argv[2]);
+        return 1;
+    }
+
+    printf("Done.\n");
     return 0;
 }
