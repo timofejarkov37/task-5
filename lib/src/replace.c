@@ -9,7 +9,15 @@
 #include <string.h>
 
 
-// Парсит escape-последовательности \0 и \\ в строке input в байтовый массив.
+// Возвращает числовое значение hex-цифры или -1 если символ не является hex-цифрой.
+static int hex_digit(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+
+// Парсит escape-последовательности \0, \\ и \xHH в строке input в байтовый массив.
 int decode_sequence(const char* input, unsigned char* output, int max_len) {
     int out_len = 0;
     int i = 0;
@@ -29,6 +37,15 @@ int decode_sequence(const char* input, unsigned char* output, int max_len) {
                 if (output) output[out_len] = '\\';
                 out_len++;
                 i += 2;
+            } else if (input[i + 1] == 'x') {
+                if (input[i + 2] == '\0' || input[i + 3] == '\0') return -1;
+                int hi = hex_digit(input[i + 2]);
+                int lo = hex_digit(input[i + 3]);
+                if (hi < 0 || lo < 0)
+                    return -1;
+                if (output) output[out_len] = (unsigned char)(hi * 16 + lo);
+                out_len++;
+                i += 4;
             } else {
                 return -1;
             }
